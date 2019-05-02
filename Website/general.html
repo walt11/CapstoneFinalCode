@@ -1,0 +1,150 @@
+<!-- 	Class:       ECE 4970W - Electrical and Computer Engineering Capstone
+		Project:     An auto-stabilizing knee brace for physcial therapy and disability applications
+		Written by:  Alex Flynn
+		
+		This script was developed following tutorials at:
+			https://www.amcharts.com/demos/line-chart-with-scroll-and-zoom/
+			https://www.amcharts.com/docs/v3/tutorials/using-data-loader-to-connect-charts-to-mysql-data-base/
+		
+		It relies on the amcharts version 3 library found at www.amcharts.com
+-->
+<!-- This script displays the general sensor data: delta roll and force -->
+<html>
+	<head>
+		<!-- Configure style elements -->
+		<style>
+			ul {
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background-color: #333;
+			}
+
+			li {
+				float: left;
+			}
+
+			li a {
+				display: block;
+				color: white;
+				text-align: center;
+				padding: 14px 16px;
+				text-decoration: none;
+			}
+
+			li a:hover {
+				background-color: #111;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Create menu bar -->
+		<ul>
+		  <li><a href="table_display.php">Table</a></li>
+		  <li><a href="general.html">General</a></li>
+		  <li><a href="upper_leg.html">Upper Leg</a></li>
+		  <li><a href="lower_leg.html">Lower Leg</a></li>
+		</ul>
+
+		<!-- Create the two div's for each graph -->
+		<p>Delta Roll</p>
+		<div id="chartdiv1" style="width: 600px; height: 300px;"></div>
+		<p>Force</p>
+		<div id="chartdiv2" style="width: 600px; height: 300px;"></div>
+
+		<!-- Resources -->
+		<script src="https://www.amcharts.com/lib/4/core.js"></script>
+		<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+		<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+		<link rel="stylesheet" href="http://www.amcharts.com/lib/style.css" type="text/css">
+		<script src="http://www.amcharts.com/lib/3/amcharts.js" type="text/javascript"></script>
+		<script src="http://www.amcharts.com/lib/3/serial.js" type="text/javascript"></script>
+	</body>
+</html>
+
+<script>
+	// Function to request (GET) the database query results of specified url (JSON format)
+	AmCharts.loadJSON = function(url) {
+		// create the request
+		if (window.XMLHttpRequest) {
+			var request = new XMLHttpRequest();
+		}else{
+			var request = new ActiveXObject('Microsoft.XMLHTTP');
+		}
+		// open request
+		request.open('GET', url, false);
+		request.send();
+
+		// return request
+		return eval(request.responseText);
+	};
+	
+	// Use am4core animated theme
+	am4core.useTheme(am4themes_animated);
+	
+	// Create chart instance for each chart
+	var chart = am4core.create("chartdiv1", am4charts.XYChart);
+	var chart2 = am4core.create("chartdiv2", am4charts.XYChart);;
+	
+	// use the above function to load the results of the database query 
+	var chartData = AmCharts.loadJSON('getDbData.php');
+	
+	// add data to charts 
+	chart.data = chartData;
+	chart2.data = chartData;
+
+	// Create X & Y axis for chart 
+	var xvalAxis = chart.xAxes.push(new am4charts.ValueAxis());
+	xvalAxis.renderer.minGridDistance = 50;
+	var yvalAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+	// Create X & Y axis for chart2
+	var x2valAxis = chart2.xAxes.push(new am4charts.ValueAxis());
+	x2valAxis.renderer.minGridDistance = 50;
+	var y2valAxis = chart2.yAxes.push(new am4charts.ValueAxis());
+
+	// Create line data series for chart (delta roll chart)
+	var series = chart.series.push(new am4charts.LineSeries());
+	series.dataFields.valueY = "D_ROLL";
+	series.dataFields.valueX = "Sample";
+	series.strokeWidth = 2;
+	series.minBulletDistance = 10;
+	series.tooltipText = "{valueY}";
+	series.tooltip.pointerOrientation = "vertical";
+	series.tooltip.background.cornerRadius = 20;
+	series.tooltip.background.fillOpacity = 0.5;
+	series.tooltip.label.padding(12,12,12,12)
+
+	// Create line data series for chart2 (force chart)
+	var series2 = chart2.series.push(new am4charts.LineSeries());
+	series2.dataFields.valueY = "f";
+	series2.dataFields.valueX = "Sample";
+	series2.strokeWidth = 2;
+	series2.minBulletDistance = 10;
+	series2.tooltipText = "{valueY}";
+	series2.tooltip.pointerOrientation = "vertical";
+	series2.tooltip.background.cornerRadius = 20;
+	series2.tooltip.background.fillOpacity = 0.5;
+	series2.tooltip.label.padding(12,12,12,12)
+
+	// below configures each chart to allow for zooming and panning 
+	// Add scrollbar to chart
+	chart.scrollbarX = new am4charts.XYChartScrollbar();
+	chart.scrollbarX.series.push(series);
+
+	// Add scrollbar to chart2
+	chart2.scrollbarX = new am4charts.XYChartScrollbar();
+	chart2.scrollbarX.series.push(series2);
+
+	// Add cursor to chart
+	chart.cursor = new am4charts.XYCursor();
+	chart.cursor.xAxis = xvalAxis;
+	chart.cursor.snapToSeries = series;
+
+	// Add cursor to chart2
+	chart2.cursor = new am4charts.XYCursor();
+	chart2.cursor.xAxis = x2valAxis;
+	chart2.cursor.snapToSeries = series2;
+
+</script>
