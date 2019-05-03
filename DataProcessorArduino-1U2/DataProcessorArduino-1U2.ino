@@ -329,19 +329,8 @@ void dispAllOut(){
   HB.println(fs.measureLoad());
 }
 
-void loop() {
-  // calculate the angle to position the servos during compression. This uses the received compression level
-  // as a percentage of the maximum angle the servos can rotate (180 degrees) -> 0 degrees = no compression &
-  // 180 degrees = maximum compression.
-  float angle = 180*compress_level/10; 
-  // calculate the angle difference of the rolls of the two IMU modules. This tells us the angle bend of the knee.
-  float d_angle = (mpu2.ypr[2]*180/M_PI)-(mpu1.ypr[2]*180/M_PI);
-  // get the new DMP data for both devices
-  mpu1.getDMPData(); // lower leg MPU6050
-  mpu2.getDMPData(); // upper leg MPU6050
-  // send the new packet of data over bluetooth
-  dispAllOut();
-  
+// This function uses the delta angle and the angle the servos should move to regulate the compression level.
+void regulateCompression(float angle, float d_angle){
   // It should be noted that because the servos are positioned with the same orientation but on opposite
   // sides of the brace, the angle of rotation differs by 180 degrees between the two.
   // # Serv1 rotates from 180 degrees (min compression) to 0 degrees (max compression)
@@ -368,6 +357,30 @@ void loop() {
   }
   // refresh servo positions for more accurate results
   SoftwareServo::refresh();
+}
+
+// This function gathers the new sensor data and processes it to determine by how much the servos should rotate,
+// sends the new values over the Bluetooth connection, and calls the regulateCompression() function to 
+// regulate the amount of compression. 
+void sensorFeedbackProcessor(){
+  // calculate the angle to position the servos during compression. This uses the received compression level
+  // as a percentage of the maximum angle the servos can rotate (180 degrees) -> 0 degrees = no compression &
+  // 180 degrees = maximum compression.
+  float angle = 180*compress_level/10; 
+  // calculate the angle difference of the rolls of the two IMU modules. This tells us the angle bend of the knee.
+  float d_angle = (mpu2.ypr[2]*180/M_PI)-(mpu1.ypr[2]*180/M_PI);
+  // get the new DMP data for both devices
+  mpu1.getDMPData(); // lower leg MPU6050
+  mpu2.getDMPData(); // upper leg MPU6050
+  // send the new packet of data over bluetooth
+  dispAllOut();
+  // regulate the compression by controlling the servos
+  regulateCompression(angle, d_angle);
+}
+
+void loop() {
+  // get sensor values and control servos
+  sensorFeedbackProcessor();
   // Sampling rate of 100ms, or 10Hz
   delay(100);
 }
