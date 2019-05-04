@@ -6,7 +6,7 @@
 #include <Servo.h>
 #include <SoftwareServo.h>
 #include "Wire.h"
-// The two libraries belong to Jeff Rowberg and were taken from
+// The two libraries below belong to Jeff Rowberg and were taken from
 // his GitHub repository: https://github.com/jrowberg/i2cdevlib.git
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
