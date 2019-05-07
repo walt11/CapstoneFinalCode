@@ -49,7 +49,7 @@ void loop() {
    lcd.clear();
    }
    else{
-    lcd.setCursor(5,0)
+    lcd.setCursor(5,0);
     lcd.print("Battery off");
     
    }
