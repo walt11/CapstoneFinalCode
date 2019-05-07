@@ -7,62 +7,52 @@
 
 #include <LiquidCrystal.h>
 
-// battery test pin
+#include <LiquidCrystal.h>
+
 int Pin = A0;
-// configure LCD display
+
 LiquidCrystal lcd(8,9,10,11,12,13);
 
+// the setup routine runs once when you press reset:
 void setup() {
-  // begin lcd display
   lcd.begin(16,2);
-  // configure pin as input
   pinMode(Pin,INPUT);
   Serial.begin(9600);
+  
 }
 
 void loop() {
-   // sample battery voltage
    float data = analogRead(Pin);
-   // max value
-   float maxv = 4.8;
-   // nominal value
-   float nom = 3.7;
-   // battery level fraction
-   float lev = nom/maxv*100;
-   // convert measured value to volts
-   float conv = (data/maxv*1023);
-   float volts = conv*100;
-   Serial.println(data); 
-   // if full battery
-   if (volts == 100)
+   float upper = 4.75;
+   float lower = 4.5; 
+   float volts = (data/1023*5);
+   Serial.println(volts,4); 
+   if (volts > upper)
    {
-     lcd.setCursor(4,0);
-     lcd.print("FULL BATTERY");
-     delay(1000);
-     lcd.clear();
+   lcd.setCursor(4,0);
+   lcd.print("FULL BATTERY");
+   delay(1000);
+   lcd.clear();
    }
-   // if nominal level
-   else if (volts < 100 && volts >= lev )
+   else if (volts <= upper && volts >= lower  )
    {
-     lcd.setCursor(3,0);
-     lcd.print("Nominal Level");
-     delay(1000);
-     lcd.clear();
+   lcd.setCursor(3,0);
+   lcd.print("Nominal Level");
+   delay(1000);
+   lcd.clear();
    }
-   // if low battery
-   else if (volts < lev)
+   else if (volts < lower && volts >= 2.0)
    {
-     lcd.setCursor(2,0);
-     lcd.print("RECHARGE SOON!");
-     delay(1000);
-     lcd.clear();
+   lcd.setCursor(2,0);
+   lcd.print("RECHARGE SOON!");
+   delay(1000);
+   lcd.clear();
    }
-   // if no battery connected
-   else
-   {
-    lcd.setCursor(1,0);
-    lcd.print("NO BATTERY!");
-    delay(1000);
-    lcd.clear();
+   else{
+    lcd.setCursor(5,0)
+    lcd.print("Battery off");
+    
    }
+
 }
+
