@@ -88,8 +88,8 @@
 								fwrite($f, $tname);
 								fclose($f);
 							}
+							$count+=1;
 						}
-						$count+=1;
 					}
 					
 					// free query result
